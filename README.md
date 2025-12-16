@@ -1,54 +1,35 @@
-       天天十点半开奖信息网站
-# 六加一组合开奖代码生成器
-# 用法：python 6+1_code.py 381752 龙
+# parse_kaijiang.py
+import re
+import pandas as pd
+from paddleocr import PaddleOCR
 
-import sys
+# 1. OCR 识别
+ocr = PaddleOCR(use_angle_cls=True, lang='ch')   # 中文模型
+img_path = 'kaijiang.jpg'
+result = ocr.ocr(img_path, cls=True)
 
-# 1. 尾数→波色/五行/阴阳 映射表
-MAP = {
-    '0': ('蓝','土','阴'),
-    '1': ('红','水','阳'),
-    '2': ('红','火','阳'),
-    '3': ('蓝','木','阴'),
-    '4': ('蓝','金','阴'),
-    '5': ('绿','土','阳'),
-    '6': ('绿','水','阴'),
-    '7': ('红','火','阴'),
-    '8': ('红','木','阳'),
-    '9': ('蓝','金','阳'),
-}
+# 把识别到的文字拼成一整串
+full_text = ''.join([line[1][0] for line in result[0]])
 
-# 2. 12 生肖→序号
-SX2NO = {s: f'{i:02d}' for i, s in enumerate(
-        '鼠牛虎兔龙蛇马羊猴鸡狗猪', start=1)}
+# 2. 正则提取 7 个开奖号码（2 位数字）
+codes = re.findall(r'\b\d{2}\b', full_text)
+codes = sorted(set(codes), key=lambda x: int(x))  # 去重 + 按大小排序
 
-def make_code(num6: str, shengxiao: str) -> str:
-    """
-    返回格式：
-    波色:蓝红...|五行:木木...|阴阳:阴阳...|生肖:05
-    """
-    num6 = num6.strip()
-    if len(num6) != 6 or not num6.isdigit():
-        raise ValueError('6 位基本号必须是 0-9 的数字')
-    if shengxiao not in SX2NO:
-        raise ValueError('生肖只能是：鼠牛虎兔龙蛇马羊猴鸡狗猪')
+# 3. 提取 7 个生肖（汉字）
+shengxiao_list = ['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪']
+pattern = '[' + ''.join(shengxiao_list) + ']'
+animals = re.findall(pattern, full_text)
+animals = sorted(set(animals), key=lambda x: shengxiao_list.index(x))
 
-    colors, elements, yinyang = [], [], []
-    for d in num6:
-        c, e, y = MAP[d]
-        colors.append(c)
-        elements.append(e)
-        yinyang.append(y)
+# 4. 整理成表格
+df = pd.DataFrame({
+    '序号': list(range(1, 8)),
+    '开奖号码': codes,
+    '生肖': animals
+})
 
-    sx_no = SX2NO[shengxiao]
-    return (f'波色:{"".join(colors)}|'
-            f'五行:{"".join(elements)}|'
-            f'阴阳:{"".join(yinyang)}|'
-            f'生肖:{sx_no}')
+# 5. 保存结果
+df.to_csv('result.csv', index=False, encoding='utf-8-sig')
+print('已提取完成，结果写入 result.csv：')
+print(df)
 
-# 3. 命令行入口
-if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        print('用法：python 6+1_code.py <6位基本号> <生肖>')
-        sys.exit(1)
-    print(make_code(sys.argv[1], sys.argv[2]))
