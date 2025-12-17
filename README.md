@@ -27,25 +27,6 @@ button{padding:10px 24px;border:none;border-radius:20px;background:#34c759;color
   <div class="balls" id="balls"></div>
   <div id="date"></div>
 
-  <!-- 控制区 -->
-  <button onclick="location.hash='admin'">进入后台</button>
-  <button onclick="clearDraw()">清空记录</button>
-
-  <!-- 隐藏的后台录入面板 -->
-  <div id="adminPanel">
-    <h3 style="margin-top:0">后台录入</h3>
-    <div class="row"><label>正选①</label><input id="n1" type="number" min="1" max="49"></div>
-    <div class="row"><label>正选②</label><input id="n2" type="number" min="1" max="49"></div>
-    <div class="row"><label>正选③</label><input id="n3" type="number" min="1" max="49"></div>
-    <div class="row"><label>正选④</label><input id="n4" type="number" min="1" max="49"></div>
-    <div class="row"><label>正选⑤</label><input id="n5" type="number" min="1" max="49"></div>
-    <div class="row"><label>正选⑥</label><input id="n6" type="number" min="1" max="49"></div>
-    <div class="row"><label>特别号</label><input id="sp" type="number" min="1" max="49"></div>
-    <button onclick="saveDraw()">保存并公布</button>
-    <button onclick="location.hash=''">关闭后台</button>
-  </div>
-</div>
-
 <script>
 /* ===== 工具函数 ===== */
 const LS_KEY = 'lottery_draw';          // localStorage 键名
